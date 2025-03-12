@@ -1,9 +1,10 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Receipt, DollarSign, Calendar, CreditCard, 
-  Home, Search, User, Printer, CheckCircle
+  Home, Search, User, Printer, CheckCircle, 
+  MoreVertical, Settings, LogOut, ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ProfileDialog from "@/components/ProfileDialog";
 
 interface PaymentDialogProps {
   tableId: number;
@@ -83,10 +93,12 @@ const PaymentDialog = ({ tableId, total, isOpen, onClose, onProcessPayment }: Pa
 };
 
 const CaissierDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("paiements");
   const [tableSearch, setTableSearch] = useState("");
   const [selectedTable, setSelectedTable] = useState<{ id: number; total: number } | null>(null);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   // Mock data for tables with bills
   const tables = [
@@ -101,6 +113,34 @@ const CaissierDashboard = () => {
     { id: 1002, table: 4, amount: 187.25, method: "Espèces", time: "19:25", status: "completed" },
     { id: 1003, table: 8, amount: 93.00, method: "Carte", time: "18:55", status: "completed" },
   ]);
+
+  const handleGoBack = () => {
+    navigate(-1);
+    toast({
+      title: "Navigation",
+      description: "Retour à la page précédente",
+    });
+  };
+
+  const handleHomeClick = () => {
+    toast({
+      title: "Navigation",
+      description: "Retour à l'accueil",
+    });
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    toast({
+      title: "Déconnexion",
+      description: "Vous avez été déconnecté avec succès",
+    });
+    navigate("/employee-login");
+  };
+
+  const handleOpenProfile = () => {
+    setProfileDialogOpen(true);
+  };
 
   const handlePayment = (tableId: number, total: number) => {
     setSelectedTable({ id: tableId, total });
@@ -162,9 +202,33 @@ const CaissierDashboard = () => {
           {/* Top Bar - Mobile only */}
           <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
             <h2 className="font-bold text-primary">Restaurant Algérien</h2>
-            <Button variant="ghost" size="icon">
-              <Home size={20} />
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="icon" onClick={handleGoBack}>
+                <ArrowLeft size={20} />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleHomeClick}>
+                <Home size={20} />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical size={20} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleOpenProfile}>
+                    <Settings size={16} className="mr-2" />
+                    Profil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut size={16} className="mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           
           {/* Content */}
@@ -178,6 +242,33 @@ const CaissierDashboard = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-primary">Caisse</h1>
                   <p className="text-gray-600">Gestion des paiements</p>
+                </div>
+                <div className="hidden md:flex gap-2">
+                  <Button variant="ghost" size="icon" onClick={handleGoBack}>
+                    <ArrowLeft size={20} />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleHomeClick}>
+                    <Home size={20} />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical size={20} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleOpenProfile}>
+                        <Settings size={16} className="mr-2" />
+                        Profil
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut size={16} className="mr-2" />
+                        Déconnexion
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
               
@@ -311,6 +402,12 @@ const CaissierDashboard = () => {
           onProcessPayment={handleProcessPayment}
         />
       )}
+      
+      {/* Profile Dialog */}
+      <ProfileDialog 
+        open={profileDialogOpen} 
+        onOpenChange={setProfileDialogOpen} 
+      />
     </div>
   );
 };

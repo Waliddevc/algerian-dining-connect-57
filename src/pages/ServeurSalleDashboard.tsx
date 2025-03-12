@@ -1,10 +1,11 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Users, Bell, ClipboardList, 
   Home, MessageSquare, User, Utensils,
-  ArrowLeft
+  ArrowLeft, Settings, LogOut, MoreVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TableOrderForm } from "@/components/TableOrderForm";
@@ -17,6 +18,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import EmployeeSidebar from "@/components/EmployeeSidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ProfileDialog from "@/components/ProfileDialog";
 
 interface Table {
   id: number;
@@ -32,6 +42,7 @@ const ServeurSalleDashboard = () => {
   const [activeTab, setActiveTab] = useState("tables");
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   const [tables, setTables] = useState<Table[]>([
     { id: 1, status: "occupied", customers: 4, time: "19:30", orders: "En cours", notifications: 1 },
@@ -82,6 +93,18 @@ const ServeurSalleDashboard = () => {
     });
   };
 
+  const handleLogout = () => {
+    toast({
+      title: "Déconnexion",
+      description: "Vous avez été déconnecté avec succès",
+    });
+    navigate("/employee-login");
+  };
+
+  const handleOpenProfile = () => {
+    setProfileDialogOpen(true);
+  };
+
   const sidebarMenuItems = [
     { icon: <Users size={18} />, label: "Gestion des tables" },
     { icon: <Utensils size={18} />, label: "Commandes en cours" },
@@ -109,6 +132,25 @@ const ServeurSalleDashboard = () => {
               <Button variant="ghost" size="icon" onClick={handleHomeClick}>
                 <Home size={20} />
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical size={20} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleOpenProfile}>
+                    <Settings size={16} className="mr-2" />
+                    Profil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut size={16} className="mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           
@@ -138,6 +180,25 @@ const ServeurSalleDashboard = () => {
                   >
                     <Home size={20} />
                   </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical size={20} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleOpenProfile}>
+                        <Settings size={16} className="mr-2" />
+                        Profil
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut size={16} className="mr-2" />
+                        Déconnexion
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -273,6 +334,12 @@ const ServeurSalleDashboard = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Profile Dialog */}
+      <ProfileDialog 
+        open={profileDialogOpen} 
+        onOpenChange={setProfileDialogOpen} 
+      />
     </div>
   );
 };

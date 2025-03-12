@@ -1,10 +1,11 @@
-
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   ChefHat, Clock, ClipboardList, 
   Home, ShoppingBag, User, Truck,
-  CookingPot, Utensils, UtensilsCrossed, AlertCircle
+  CookingPot, Utensils, UtensilsCrossed, AlertCircle,
+  MoreVertical, Settings, LogOut, ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ProfileDialog from "@/components/ProfileDialog";
 
 // Types pour notre application
 interface KitchenOrder {
@@ -38,6 +48,7 @@ interface OrderItem {
 }
 
 const CuisineDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("enCours");
   const [orderDetails, setOrderDetails] = useState<KitchenOrder | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -46,6 +57,7 @@ const CuisineDashboard = () => {
   const [feedbackOrderId, setFeedbackOrderId] = useState<number | null>(null);
   const [updateCounter, setUpdateCounter] = useState(0);
   const [timer, setTimer] = useState<number>(0);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   
   // Mock data for orders in progress
   const [ordersInProgress, setOrdersInProgress] = useState<KitchenOrder[]>([
@@ -143,6 +155,34 @@ const CuisineDashboard = () => {
       status: "completed" 
     },
   ]);
+
+  const handleGoBack = () => {
+    navigate(-1);
+    toast({
+      title: "Navigation",
+      description: "Retour à la page précédente",
+    });
+  };
+
+  const handleHomeClick = () => {
+    toast({
+      title: "Navigation",
+      description: "Retour à l'accueil",
+    });
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    toast({
+      title: "Déconnexion",
+      description: "Vous avez été déconnecté avec succès",
+    });
+    navigate("/employee-login");
+  };
+
+  const handleOpenProfile = () => {
+    setProfileDialogOpen(true);
+  };
 
   // Update timer every second to track cooking time
   useEffect(() => {
@@ -334,9 +374,33 @@ const CuisineDashboard = () => {
           {/* Top Bar - Mobile only */}
           <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
             <h2 className="font-bold text-primary">Restaurant Algérien</h2>
-            <Button variant="ghost" size="icon">
-              <Home size={20} />
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="icon" onClick={handleGoBack}>
+                <ArrowLeft size={20} />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleHomeClick}>
+                <Home size={20} />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical size={20} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleOpenProfile}>
+                    <Settings size={16} className="mr-2" />
+                    Profil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut size={16} className="mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           
           {/* Content */}
@@ -353,6 +417,33 @@ const CuisineDashboard = () => {
                 </div>
                 
                 <div className="flex space-x-2">
+                  <div className="hidden md:flex gap-2">
+                    <Button variant="ghost" size="icon" onClick={handleGoBack}>
+                      <ArrowLeft size={20} />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={handleHomeClick}>
+                      <Home size={20} />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical size={20} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleOpenProfile}>
+                          <Settings size={16} className="mr-2" />
+                          Profil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout}>
+                          <LogOut size={16} className="mr-2" />
+                          Déconnexion
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   <Button 
                     variant="outline" 
                     className="gap-2"
@@ -758,6 +849,12 @@ const CuisineDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Profile Dialog */}
+      <ProfileDialog 
+        open={profileDialogOpen} 
+        onOpenChange={setProfileDialogOpen} 
+      />
     </div>
   );
 };
