@@ -1,317 +1,28 @@
-import { motion } from "framer-motion";
+
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { 
-  Users, Calendar, Bell, ClipboardList, 
-  Home, LogOut, LayoutDashboard, Settings, 
-  ChefHat, Utensils
+  Home, ArrowLeft, MoreVertical, UserCircle, LogOut,
+  ClipboardList, UsersRound, Bell, Coffee
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogDescription
-} from "@/components/ui/dialog";
+import ProfileDialog from "@/components/ProfileDialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import EmployeeSidebar from "@/components/EmployeeSidebar";
-import { TableOrderForm } from "@/components/TableOrderForm";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface TableData {
-  id: number;
-  status: "available" | "occupied" | "reserved" | string;
-  customers: number;
-  time: string;
-  orders: string;
-}
-
-interface ReservationData {
-  id: number;
-  name: string;
-  time: string;
-  people: number;
-  table: number | null;
-  status: "Confirmé" | "En attente";
-}
-
-interface OrderData {
-  id: number;
-  tableId: number;
-  items: {
-    id: number;
-    name: string;
-    quantity: number;
-    status: "En attente" | "En préparation" | "Prêt" | "Servi";
-    notes?: string;
-  }[];
-  time: string;
-  status: "En attente" | "En préparation" | "Prêt" | "Servi" | "Terminé";
-}
-
-export const ServeurChefDashboard = () => {
+const ServeurChefDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("tables");
-  const [selectedTable, setSelectedTable] = useState<number | null>(null);
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [showOrderDetails, setShowOrderDetails] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
-  const [assignTableDialog, setAssignTableDialog] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<ReservationData | null>(null);
-
-  const [tables, setTables] = useState<TableData[]>([
-    { id: 1, status: "available", customers: 0, time: "--:--", orders: "" },
-    { id: 2, status: "occupied", customers: 4, time: "19:15", orders: "Couscous (2), Chorba (4)" },
-    { id: 3, status: "reserved", customers: 2, time: "20:00", orders: "" },
-    { id: 4, status: "available", customers: 0, time: "--:--", orders: "" },
-    { id: 5, status: "available", customers: 0, time: "--:--", orders: "" },
-    { id: 6, status: "occupied", customers: 6, time: "18:45", orders: "Tajine (3), Makroud (6)" }
-  ]);
-
-  const [reservations, setReservations] = useState<ReservationData[]>([
-    { id: 101, name: "Karim Benzema", time: "20:00", people: 2, table: 3, status: "Confirmé" },
-    { id: 102, name: "Zinedine Zidane", time: "21:00", people: 3, table: 8, status: "Confirmé" },
-    { id: 103, name: "Houssem Aouar", time: "19:45", people: 4, table: null, status: "En attente" },
-    { id: 104, name: "Ismael Bennacer", time: "20:30", people: 2, table: null, status: "En attente" },
-  ]);
-
-  const [orders, setOrders] = useState<OrderData[]>([
-    { 
-      id: 1, 
-      tableId: 1, 
-      items: [
-        { id: 1, name: "Couscous Royal", quantity: 2, status: "En préparation" },
-        { id: 3, name: "Pastilla au Poulet", quantity: 1, status: "En attente", notes: "Sans amandes" }
-      ],
-      time: "19:35",
-      status: "En préparation"
-    },
-    { 
-      id: 2, 
-      tableId: 5, 
-      items: [
-        { id: 2, name: "Tajine Poulet", quantity: 3, status: "Prêt" },
-        { id: 5, name: "Mint Tea", quantity: 3, status: "Servi" }
-      ],
-      time: "19:20",
-      status: "Prêt"
-    },
-    { 
-      id: 3, 
-      tableId: 6, 
-      items: [
-        { id: 4, name: "Méchoui", quantity: 1, status: "En préparation" },
-        { id: 5, name: "Mint Tea", quantity: 2, status: "En attente" }
-      ],
-      time: "20:20",
-      status: "En préparation"
-    }
-  ]);
-
-  const handleTableClick = (tableId: number) => {
-    setSelectedTable(tableId);
-    
-    const table = tables.find(t => t.id === tableId);
-    if (table?.status === "occupied") {
-      const tableOrder = orders.find(o => o.tableId === tableId);
-      if (tableOrder) {
-        setSelectedOrder(tableOrder);
-        setShowOrderDetails(true);
-      } else {
-        setShowOrderForm(true);
-      }
-    } else if (table?.status === "available") {
-      toast({
-        title: `Table ${tableId}`,
-        description: "Table disponible. Cliquez sur 'Réservations' pour assigner des clients.",
-      });
-    } else if (table?.status === "reserved") {
-      toast({
-        title: `Table ${tableId}`,
-        description: "Table réservée. Les clients devraient arriver bientôt.",
-      });
-    }
-  };
-
-  const handleReservationAction = (resId: number, action: string) => {
-    if (action === "confirmée") {
-      const reservation = reservations.find(r => r.id === resId);
-      if (reservation && reservation.table === null) {
-        setSelectedReservation(reservation);
-        setAssignTableDialog(true);
-      } else {
-        toast({
-          title: `Réservation ${resId} confirmée`,
-          description: "Table déjà assignée à cette réservation.",
-        });
-      }
-    } else if (action === "annulée") {
-      const updatedReservations = reservations.map(r => {
-        if (r.id === resId) {
-          if (r.table) {
-            const updatedTables = tables.map(t => {
-              if (t.id === r.table) {
-                return { ...t, status: "available", customers: 0, time: "", orders: "" };
-              }
-              return t;
-            });
-            setTables(updatedTables);
-          }
-          return { ...r, status: "En attente" as const, table: null };
-        }
-        return r;
-      });
-      
-      setReservations(updatedReservations);
-      
-      toast({
-        title: `Réservation ${resId} annulée`,
-        description: "La réservation a été annulée et la table a été libérée.",
-      });
-    }
-  };
-
-  const assignTableToReservation = (tableId: number) => {
-    if (!selectedReservation) return;
-    
-    const updatedTables = tables.map(t => {
-      if (t.id === tableId) {
-        return {
-          ...t,
-          status: "reserved" as const,
-          customers: selectedReservation.people,
-          time: selectedReservation.time,
-          orders: "En attente"
-        };
-      }
-      return t;
-    });
-    
-    const updatedReservations = reservations.map(r => {
-      if (r.id === selectedReservation.id) {
-        return { ...r, table: tableId, status: "Confirmé" as const };
-      }
-      return r;
-    });
-    
-    setTables(updatedTables);
-    setReservations(updatedReservations);
-    setAssignTableDialog(false);
-    
-    toast({
-      title: "Table assignée",
-      description: `Table ${tableId} assignée à la réservation de ${selectedReservation.name}`,
-    });
-  };
-  
-  const handleAddOrder = (orderData: { tableId: number; dishId: number; quantity: number; notes: string }) => {
-    const menuItems = [
-      { id: 1, name: "Couscous Royal", price: 18.99 },
-      { id: 2, name: "Tajine Poulet", price: 16.99 },
-      { id: 3, name: "Pastilla au Poulet", price: 15.99 },
-      { id: 4, name: "Méchoui", price: 24.99 },
-      { id: 5, name: "Mint Tea", price: 3.99 },
-    ];
-    
-    const dishName = menuItems.find(item => item.id === orderData.dishId)?.name || "Plat inconnu";
-    
-    const existingOrderIndex = orders.findIndex(o => o.tableId === orderData.tableId);
-    
-    if (existingOrderIndex !== -1) {
-      const updatedOrders = [...orders];
-      updatedOrders[existingOrderIndex].items.push({
-        id: orderData.dishId,
-        name: dishName,
-        quantity: orderData.quantity,
-        status: "En attente",
-        notes: orderData.notes || undefined
-      });
-      
-      setOrders(updatedOrders);
-    } else {
-      const newOrder: OrderData = {
-        id: orders.length + 1,
-        tableId: orderData.tableId,
-        items: [{
-          id: orderData.dishId,
-          name: dishName,
-          quantity: orderData.quantity,
-          status: "En attente",
-          notes: orderData.notes || undefined
-        }],
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: "En attente"
-      };
-      
-      setOrders([...orders, newOrder]);
-      
-      if (tables.find(t => t.id === orderData.tableId)?.status !== "occupied") {
-        const updatedTables = tables.map(t => {
-          if (t.id === orderData.tableId) {
-            return {
-              ...t,
-              status: "occupied",
-              customers: t.customers || 2,
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              orders: "En cours"
-            };
-          }
-          return t;
-        });
-        
-        setTables(updatedTables);
-      }
-    }
-  };
-
-  const updateOrderStatus = (orderId: number, status: OrderData["status"]) => {
-    const updatedOrders = orders.map(order => {
-      if (order.id === orderId) {
-        return { ...order, status };
-      }
-      return order;
-    });
-    
-    setOrders(updatedOrders);
-    
-    if (status === "Servi" || status === "Terminé") {
-      const order = orders.find(o => o.id === orderId);
-      if (order) {
-        const updatedTables = tables.map(table => {
-          if (table.id === order.tableId) {
-            return { ...table, orders: status };
-          }
-          return table;
-        });
-        
-        setTables(updatedTables);
-      }
-    }
-    
-    toast({
-      title: "Statut mis à jour",
-      description: `La commande #${orderId} est maintenant "${status}"`,
-    });
-    
-    setShowOrderDetails(false);
-  };
-
-  const updateTableStatus = (tableId: number, status: "available" | "occupied" | "reserved") => {
-    setTables(tables.map(table => 
-      table.id === tableId 
-        ? { ...table, status, customers: status === "available" ? 0 : table.customers, time: status === "available" ? "--:--" : table.time, orders: status === "available" ? "" : table.orders } 
-        : table
-    ));
-  };
+  const [activeTab, setActiveTab] = useState("orders");
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   const handleLogout = () => {
     toast({
@@ -321,380 +32,255 @@ export const ServeurChefDashboard = () => {
     setTimeout(() => navigate("/"), 1500);
   };
 
-  const menuItems = [
-    {
-      icon: <LayoutDashboard size={18} />,
-      label: "Tableau de bord",
-      onClick: () => setActiveTab("tables")
-    },
-    {
-      icon: <Users size={18} />,
-      label: "Gestion des tables",
-      onClick: () => setActiveTab("tables")
-    },
-    {
-      icon: <Calendar size={18} />,
-      label: "Réservations",
-      onClick: () => setActiveTab("reservations")
-    },
-    {
-      icon: <ClipboardList size={18} />,
-      label: "Commandes",
-      onClick: () => setActiveTab("orders")
-    },
-    {
-      icon: <Bell size={18} />,
-      label: "Notifications",
-      onClick: () => toast({
-        title: "Notifications",
-        description: "Vous n'avez pas de nouvelles notifications."
-      })
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      <div className="flex h-screen overflow-hidden">
-        <EmployeeSidebar 
-          title="Restaurant Algérien"
-          role="Serveur Chef"
-          menuItems={menuItems}
-        />
-        
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-primary">Tableau de Bord</h1>
-                  <p className="text-gray-600">Gérez vos tables et réservations</p>
-                </div>
-              </div>
-              
-              <Tabs defaultValue="tables" className="mb-6" onValueChange={setActiveTab} value={activeTab}>
-                <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-3">
-                  <TabsTrigger value="tables">Plan des Tables</TabsTrigger>
-                  <TabsTrigger value="reservations">Réservations</TabsTrigger>
-                  <TabsTrigger value="orders">Commandes</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="tables" className="mt-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {tables.map((table) => (
-                      <motion.div
-                        key={table.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3, delay: table.id * 0.05 }}
-                        className={`p-4 rounded-lg cursor-pointer shadow-sm ${
-                          table.status === 'available' 
-                            ? 'bg-green-50 border border-green-200' 
-                            : table.status === 'occupied' 
-                              ? 'bg-red-50 border border-red-200' 
-                              : 'bg-yellow-50 border border-yellow-200'
-                        }`}
-                        onClick={() => handleTableClick(table.id)}
-                      >
-                        <div className="text-center">
-                          <h3 className="font-medium">Table {table.id}</h3>
-                          <div className={`text-xs font-medium uppercase mt-1 ${
-                            table.status === 'available' 
-                              ? 'text-green-600' 
-                              : table.status === 'occupied' 
-                                ? 'text-red-600' 
-                                : 'text-yellow-600'
-                          }`}>
-                            {table.status === 'available' 
-                              ? 'Disponible' 
-                              : table.status === 'occupied' 
-                                ? 'Occupée' 
-                                : 'Réservée'}
-                          </div>
-                          
-                          {table.status !== 'available' && (
-                            <div className="mt-2 text-sm">
-                              <p>{table.customers} personnes</p>
-                              <p>{table.time}</p>
-                              {table.orders && <p className="font-medium">{table.orders}</p>}
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="reservations" className="mt-6">
-                  <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Client</TableHead>
-                          <TableHead>Heure</TableHead>
-                          <TableHead>Pers.</TableHead>
-                          <TableHead>Table</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {reservations.map((res) => (
-                          <TableRow key={res.id}>
-                            <TableCell>{res.name}</TableCell>
-                            <TableCell>{res.time}</TableCell>
-                            <TableCell>{res.people}</TableCell>
-                            <TableCell>
-                              {res.table ? `Table ${res.table}` : '-'}
-                            </TableCell>
-                            <TableCell>
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                res.status === 'Confirmé' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {res.status}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-primary hover:text-primary-dark mr-2"
-                                onClick={() => handleReservationAction(res.id, "confirmée")}
-                              >
-                                Confirmer
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-red-600 hover:text-red-800"
-                                onClick={() => handleReservationAction(res.id, "annulée")}
-                              >
-                                Annuler
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="orders" className="mt-6">
-                  <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Commande #</TableHead>
-                          <TableHead>Table</TableHead>
-                          <TableHead>Heure</TableHead>
-                          <TableHead>Éléments</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {orders.map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell>#{order.id}</TableCell>
-                            <TableCell>Table {order.tableId}</TableCell>
-                            <TableCell>{order.time}</TableCell>
-                            <TableCell>{order.items.length} plat(s)</TableCell>
-                            <TableCell>
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                order.status === 'En attente' 
-                                  ? 'bg-yellow-100 text-yellow-800' 
-                                  : order.status === 'En préparation'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : order.status === 'Prêt'
-                                      ? 'bg-green-100 text-green-800'
-                                      : order.status === 'Servi'
-                                        ? 'bg-purple-100 text-purple-800'
-                                        : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {order.status}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-primary hover:text-primary-dark"
-                                onClick={() => {
-                                  setSelectedOrder(order);
-                                  setShowOrderDetails(true);
-                                }}
-                              >
-                                Détails
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </motion.div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-2">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft size={20} />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <Home size={20} />
+            </Button>
           </div>
+          <h1 className="text-xl font-semibold text-primary">Serveur Chef</h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical size={20} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+                <UserCircle className="mr-2 h-4 w-4" />
+                <span>Profil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-      
-      <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nouvelle commande - Table {selectedTable}</DialogTitle>
-            <DialogDescription>
-              Ajoutez une commande pour cette table.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedTable && (
-            <TableOrderForm 
-              tableId={selectedTable} 
-              onClose={() => setShowOrderForm(false)} 
-              onSubmit={handleAddOrder}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Détails de la commande - Table {selectedOrder?.tableId}</DialogTitle>
-            <DialogDescription>
-              Commande #{selectedOrder?.id} - {selectedOrder?.time}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="border rounded-md p-4">
-              <h3 className="font-medium mb-2">Éléments commandés</h3>
-              <ul className="space-y-2">
-                {selectedOrder?.items.map((item, idx) => (
-                  <li key={idx} className="flex justify-between">
-                    <span>
-                      {item.quantity}x {item.name}
-                      {item.notes && <span className="text-xs text-gray-500 block">{item.notes}</span>}
-                    </span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      item.status === 'En attente' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : item.status === 'En préparation'
-                          ? 'bg-blue-100 text-blue-800'
-                          : item.status === 'Prêt'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-purple-100 text-purple-800'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </li>
+
+      <div className="container mx-auto p-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Gestion des Serveurs</h1>
+              <p className="text-gray-600">Supervisez l'équipe et les commandes</p>
+            </div>
+            <Button 
+              className="mt-4 sm:mt-0"
+              onClick={() => toast({ 
+                title: "Notification envoyée", 
+                description: "Tous les serveurs ont été notifiés" 
+              })}
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              Notifier l'équipe
+            </Button>
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto">
+              <TabsTrigger value="orders">Commandes</TabsTrigger>
+              <TabsTrigger value="staff">Personnel</TabsTrigger>
+              <TabsTrigger value="tables">Tables</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="orders">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle>Commandes en cours</CardTitle>
+                    <CardDescription>Les commandes actuellement en préparation</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start p-3 bg-accent/5 rounded-md">
+                        <div>
+                          <p className="font-medium">Table 5 - Commande #123</p>
+                          <p className="text-sm text-gray-500">2 personnes • 20:15</p>
+                          <ul className="text-sm mt-1 list-disc list-inside">
+                            <li>1× Couscous Royal</li>
+                            <li>1× Tajine Poulet</li>
+                          </ul>
+                        </div>
+                        <Badge>En préparation</Badge>
+                      </div>
+                      
+                      <div className="flex justify-between items-start p-3 bg-accent/5 rounded-md">
+                        <div>
+                          <p className="font-medium">Table 8 - Commande #124</p>
+                          <p className="text-sm text-gray-500">4 personnes • 20:30</p>
+                          <ul className="text-sm mt-1 list-disc list-inside">
+                            <li>2× Méchoui</li>
+                            <li>2× Salade</li>
+                          </ul>
+                        </div>
+                        <Badge>En préparation</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="outline" className="w-full">Voir toutes les commandes</Button>
+                  </CardFooter>
+                </Card>
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle>Commandes prêtes</CardTitle>
+                    <CardDescription>Les commandes à servir</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start p-3 bg-green-50 rounded-md border border-green-100">
+                        <div>
+                          <p className="font-medium">Table 3 - Commande #121</p>
+                          <p className="text-sm text-gray-500">3 personnes • 20:00</p>
+                          <ul className="text-sm mt-1 list-disc list-inside">
+                            <li>3× Chorba</li>
+                          </ul>
+                        </div>
+                        <Badge className="bg-green-500">Prêt à servir</Badge>
+                      </div>
+                      
+                      <div className="flex justify-between items-start p-3 bg-green-50 rounded-md border border-green-100">
+                        <div>
+                          <p className="font-medium">Table 1 - Commande #122</p>
+                          <p className="text-sm text-gray-500">2 personnes • 20:05</p>
+                          <ul className="text-sm mt-1 list-disc list-inside">
+                            <li>2× Thé à la menthe</li>
+                          </ul>
+                        </div>
+                        <Badge className="bg-green-500">Prêt à servir</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full">Assigner des serveurs</Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="staff">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Équipe de service</CardTitle>
+                  <CardDescription>Statut et assignation des serveurs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-md border">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <Coffee size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Ahmed Salhi</p>
+                          <p className="text-sm text-gray-500">Serveur Salle</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-green-500">Actif</Badge>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-3 bg-white rounded-md border">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <Coffee size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Mounir Lahmar</p>
+                          <p className="text-sm text-gray-500">Serveur Salle</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-orange-500">En pause</Badge>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-3 bg-white rounded-md border">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <Coffee size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Karim Benali</p>
+                          <p className="text-sm text-gray-500">Serveur Salle</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-green-500">Actif</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full">Gérer les rotations</Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="tables">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((table) => (
+                  <Card key={table}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <CardTitle>Table {table}</CardTitle>
+                        <Badge className={table % 3 === 0 ? "bg-red-500" : table % 3 === 1 ? "bg-green-500" : "bg-gray-500"}>
+                          {table % 3 === 0 ? "Occupée" : table % 3 === 1 ? "Libre" : "Réservée"}
+                        </Badge>
+                      </div>
+                      <CardDescription>
+                        {table % 3 === 0 ? "Depuis 19:45" : table % 3 === 1 ? "Disponible" : "Pour 21:00"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      {table % 3 === 0 && (
+                        <>
+                          <p>4 personnes</p>
+                          <p>Serveur: Ahmed Salhi</p>
+                          <p className="text-primary font-medium mt-1">1 commande en cours</p>
+                        </>
+                      )}
+                      {table % 3 === 2 && (
+                        <p>Réservation pour 2 personnes</p>
+                      )}
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" size="sm" className="w-full">
+                        {table % 3 === 0 ? "Voir détails" : table % 3 === 1 ? "Assigner serveur" : "Modifier réservation"}
+                      </Button>
+                    </CardFooter>
+                  </Card>
                 ))}
-              </ul>
-            </div>
-            
-            <div className="flex justify-between">
-              <p>Statut: <span className="font-medium">{selectedOrder?.status}</span></p>
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              {selectedOrder?.status !== "Terminé" && (
-                <>
-                  {selectedOrder?.status === "En attente" && (
-                    <Button
-                      variant="outline" 
-                      onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, "En préparation")}
-                    >
-                      <ChefHat className="mr-2" size={16} />
-                      En préparation
-                    </Button>
-                  )}
-                  
-                  {selectedOrder?.status === "En préparation" && (
-                    <Button
-                      variant="outline"
-                      onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, "Prêt")}
-                    >
-                      <Utensils className="mr-2" size={16} />
-                      Prêt à servir
-                    </Button>
-                  )}
-                  
-                  {selectedOrder?.status === "Prêt" && (
-                    <Button
-                      variant="outline"
-                      onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, "Servi")}
-                    >
-                      Servi
-                    </Button>
-                  )}
-                  
-                  {selectedOrder?.status === "Servi" && (
-                    <Button
-                      variant="outline"
-                      onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, "Terminé")}
-                    >
-                      Terminer
-                    </Button>
-                  )}
-                </>
-              )}
-              
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowOrderDetails(false)}
-              >
-                Fermer
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={assignTableDialog} onOpenChange={setAssignTableDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Assigner une table</DialogTitle>
-            <DialogDescription>
-              Choisissez une table pour la réservation de {selectedReservation?.name}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-            {tables
-              .filter(table => table.status === "available")
-              .map(table => (
-                <Button
-                  key={table.id}
-                  variant="outline"
-                  className="h-24 flex flex-col items-center justify-center"
-                  onClick={() => assignTableToReservation(table.id)}
-                >
-                  <span className="text-lg font-medium">Table {table.id}</span>
-                  <span className="text-xs text-green-600">Disponible</span>
-                </Button>
-              ))}
-              
-            {tables.filter(table => table.status === "available").length === 0 && (
-              <p className="col-span-full text-center text-gray-500">
-                Aucune table disponible. Veuillez libérer une table d'abord.
-              </p>
-            )}
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            onClick={() => setAssignTableDialog(false)}
-            className="mt-4"
-          >
-            Annuler
-          </Button>
-        </DialogContent>
-      </Dialog>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+      </div>
+
+      <ProfileDialog 
+        open={showProfileDialog}
+        onOpenChange={setShowProfileDialog}
+        initialData={{
+          name: "Nadir Serveur Chef",
+          email: "nadir@restaurant.dz",
+          phone: "0555123456",
+        }}
+        titles={{
+          dialog: "Profil Serveur Chef",
+          description: "Mettez à jour vos informations personnelles ici.",
+          submitButton: "Enregistrer les modifications",
+          successMessage: "Les informations de serveur chef ont été mises à jour avec succès"
+        }}
+      />
     </div>
   );
 };

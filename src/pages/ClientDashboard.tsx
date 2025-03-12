@@ -3,7 +3,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Book, Utensils, Receipt, QrCode, 
-  Star, ShoppingBag, LogOut, ShoppingCart
+  Star, ShoppingBag, LogOut, ShoppingCart,
+  Home, ArrowLeft, MoreVertical, UserCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,11 +17,19 @@ import OrderHistoryComponent from "@/components/client/OrderHistoryComponent";
 import TableReservationComponent from "@/components/client/TableReservationComponent";
 import RatingComponent from "@/components/client/RatingComponent";
 import { Card } from "@/components/ui/card";
+import ProfileDialog from "@/components/ProfileDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [cartItems, setCartItems] = useState<DeliveryItem[]>([]);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
   
   const menuOptions = [
     { 
@@ -141,6 +150,37 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-2">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft size={20} />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <Home size={20} />
+            </Button>
+          </div>
+          <h1 className="text-xl font-semibold text-primary">Espace Client</h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical size={20} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+                <UserCircle className="mr-2 h-4 w-4" />
+                <span>Profil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
       <div className="container mx-auto p-6">
         <motion.div
           initial={{ opacity: 0 }}
@@ -150,7 +190,7 @@ const ClientDashboard = () => {
         >
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-primary">Bienvenue, Client</h1>
+              <h2 className="text-3xl font-bold text-primary">Bienvenue, Client</h2>
               <p className="text-gray-600">Que souhaitez-vous faire aujourd'hui?</p>
             </div>
             <div className="flex items-center gap-4">
@@ -164,14 +204,6 @@ const ClientDashboard = () => {
                   Panier ({cartItems.length})
                 </Button>
               )}
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={handleLogout}
-              >
-                <LogOut size={16} />
-                Déconnexion
-              </Button>
             </div>
           </div>
         </motion.div>
@@ -316,6 +348,16 @@ const ClientDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <ProfileDialog 
+        open={showProfileDialog}
+        onOpenChange={setShowProfileDialog}
+        initialData={{
+          name: "Client Utilisateur",
+          email: "client@restaurant.dz",
+          phone: "0555123456",
+        }}
+      />
     </div>
   );
 };

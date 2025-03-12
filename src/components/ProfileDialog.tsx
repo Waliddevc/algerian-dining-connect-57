@@ -19,6 +19,17 @@ import { toast } from "@/components/ui/use-toast";
 interface ProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  titles?: {
+    dialog: string;
+    description: string;
+    submitButton: string;
+    successMessage: string;
+  };
 }
 
 const formSchema = z.object({
@@ -27,14 +38,21 @@ const formSchema = z.object({
   phone: z.string().min(10, { message: "Numéro de téléphone invalide" }),
 });
 
-export default function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
-  // Mock initial data - in a real app this would come from your user state/context
-  const [initialData] = useState({
-    name: "Nadir Serveur",
-    email: "nadir@restaurant.dz",
+export default function ProfileDialog({ 
+  open, 
+  onOpenChange, 
+  initialData = {
+    name: "Utilisateur",
+    email: "utilisateur@restaurant.dz",
     phone: "0555123456",
-  });
-
+  },
+  titles = {
+    dialog: "Profil",
+    description: "Mettez à jour vos informations personnelles ici.",
+    submitButton: "Enregistrer les modifications",
+    successMessage: "Vos informations ont été mises à jour avec succès"
+  }
+}: ProfileDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData,
@@ -44,7 +62,7 @@ export default function ProfileDialog({ open, onOpenChange }: ProfileDialogProps
     // In a real app, you would update the user profile in your backend
     toast({
       title: "Profil mis à jour",
-      description: "Vos informations ont été mises à jour avec succès",
+      description: titles.successMessage,
     });
     onOpenChange(false);
   }
@@ -53,9 +71,9 @@ export default function ProfileDialog({ open, onOpenChange }: ProfileDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Profil</DialogTitle>
+          <DialogTitle>{titles.dialog}</DialogTitle>
           <DialogDescription>
-            Mettez à jour vos informations personnelles ici.
+            {titles.description}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -100,7 +118,7 @@ export default function ProfileDialog({ open, onOpenChange }: ProfileDialogProps
               )}
             />
             <DialogFooter className="pt-4">
-              <Button type="submit">Enregistrer les modifications</Button>
+              <Button type="submit">{titles.submitButton}</Button>
             </DialogFooter>
           </form>
         </Form>
