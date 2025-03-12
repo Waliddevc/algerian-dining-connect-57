@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { 
@@ -6,7 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import EmployeeSidebar from "@/components/EmployeeSidebar";
 import { Input } from "@/components/ui/input";
 import {
@@ -238,7 +239,7 @@ const CaissierDashboard = () => {
                         <div className="flex space-x-2">
                           <Button 
                             className="flex-1"
-                            onClick={() => handlePayment(table.id)}
+                            onClick={() => handlePayment(table.id, table.total)}
                           >
                             <CreditCard size={16} className="mr-1" />
                             Paiement
@@ -299,6 +300,17 @@ const CaissierDashboard = () => {
           </div>
         </div>
       </div>
+      
+      {/* Payment Dialog */}
+      {selectedTable && (
+        <PaymentDialog
+          tableId={selectedTable.id}
+          total={selectedTable.total}
+          isOpen={isPaymentDialogOpen}
+          onClose={() => setIsPaymentDialogOpen(false)}
+          onProcessPayment={handleProcessPayment}
+        />
+      )}
     </div>
   );
 };
