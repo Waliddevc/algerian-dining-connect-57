@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Users, Bell, ClipboardList, 
   Home, MessageSquare, User, Utensils
@@ -27,6 +28,7 @@ interface Table {
 }
 
 const ServeurSalleDashboard = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("tables");
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
@@ -64,6 +66,14 @@ const ServeurSalleDashboard = () => {
     });
   };
 
+  const handleHomeClick = () => {
+    toast({
+      title: "Navigation",
+      description: "Retour à l'accueil",
+    });
+    navigate("/");
+  };
+
   const sidebarMenuItems = [
     { icon: <Users size={18} />, label: "Gestion des tables" },
     { icon: <Utensils size={18} />, label: "Commandes en cours" },
@@ -84,7 +94,7 @@ const ServeurSalleDashboard = () => {
         <div className="flex-1 overflow-auto">
           <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
             <h2 className="font-bold text-primary">Restaurant Algérien</h2>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleHomeClick}>
               <Home size={20} />
             </Button>
           </div>
@@ -100,6 +110,14 @@ const ServeurSalleDashboard = () => {
                   <h1 className="text-2xl font-bold text-primary">Serveur en Salle</h1>
                   <p className="text-gray-600">Gérez vos tables et les commandes</p>
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="hidden md:flex"
+                  onClick={handleHomeClick}
+                >
+                  <Home size={20} />
+                </Button>
               </div>
               
               <Tabs defaultValue="tables" className="mb-6" onValueChange={setActiveTab}>
