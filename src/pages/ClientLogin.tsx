@@ -1,12 +1,12 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { Utensils } from "lucide-react";
+import { Home, Utensils } from "lucide-react";
 
 const ClientLogin = () => {
   const navigate = useNavigate();
@@ -48,7 +48,12 @@ const ClientLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center justify-center p-6 relative">
+      {/* Home Icon */}
+      <Link to="/" className="absolute top-6 left-6 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all">
+        <Home className="text-accent h-6 w-6" />
+      </Link>
+      
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
