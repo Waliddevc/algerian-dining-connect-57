@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -35,6 +34,7 @@ const GerantDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-2">
         <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-semibold text-primary">Espace Gérant</h1>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
               <ArrowLeft size={20} />
@@ -42,25 +42,24 @@ const GerantDashboard = () => {
             <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
               <Home size={20} />
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical size={20} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
+                  <UserCircle className="mr-2 h-4 w-4" />
+                  <span>Profil</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Déconnexion</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <h1 className="text-xl font-semibold text-primary">Espace Gérant</h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreVertical size={20} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
-                <UserCircle className="mr-2 h-4 w-4" />
-                <span>Profil</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Déconnexion</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
 
@@ -71,11 +70,9 @@ const GerantDashboard = () => {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
-              <p className="text-gray-600">Bienvenue sur votre espace de gestion du restaurant</p>
-            </div>
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
+            <p className="text-gray-600">Bienvenue sur votre espace de gestion du restaurant</p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

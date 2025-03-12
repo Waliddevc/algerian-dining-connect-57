@@ -115,6 +115,39 @@ const ServeurSalleDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-2 md:hidden">
+        <div className="container mx-auto flex justify-between items-center">
+          <h2 className="font-bold text-primary">Restaurant Algérien</h2>
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" onClick={handleGoBack}>
+              <ArrowLeft size={20} />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleHomeClick}>
+              <Home size={20} />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical size={20} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleOpenProfile}>
+                  <Settings size={16} className="mr-2" />
+                  Profil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut size={16} className="mr-2" />
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+
       <div className="flex h-screen overflow-hidden">
         <EmployeeSidebar 
           title="Restaurant Algérien" 
@@ -123,37 +156,6 @@ const ServeurSalleDashboard = () => {
         />
         
         <div className="flex-1 overflow-auto">
-          <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
-            <h2 className="font-bold text-primary">Restaurant Algérien</h2>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="icon" onClick={handleGoBack}>
-                <ArrowLeft size={20} />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleHomeClick}>
-                <Home size={20} />
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical size={20} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleOpenProfile}>
-                    <Settings size={16} className="mr-2" />
-                    Profil
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut size={16} className="mr-2" />
-                    Déconnexion
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          
           <div className="p-6">
             <motion.div
               initial={{ opacity: 0 }}
@@ -165,7 +167,7 @@ const ServeurSalleDashboard = () => {
                   <h1 className="text-2xl font-bold text-primary">Serveur en Salle</h1>
                   <p className="text-gray-600">Gérez vos tables et les commandes</p>
                 </div>
-                <div className="hidden md:flex gap-2">
+                <div className="hidden md:flex items-center space-x-2">
                   <Button 
                     variant="ghost" 
                     size="icon"

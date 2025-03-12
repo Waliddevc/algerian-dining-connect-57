@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Package, CheckCircle, Clock, Star, User, Settings, LogOut, Home, ArrowLeft, MoreVertical } from "lucide-react";
@@ -130,34 +129,20 @@ const LivreurDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="container py-12"
-      >
-        <div className="flex justify-between items-center mb-8">
+      <div className="sticky top-0 z-10 bg-white shadow-sm px-4 py-2">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-semibold text-primary">Tableau de bord Livreur</h1>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" onClick={handleGoBack}>
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft size={20} />
             </Button>
             <Button variant="ghost" size="icon" onClick={handleGoHome}>
-              <Home className="h-5 w-5" />
+              <Home size={20} />
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-primary">
-                Tableau de bord Livreur
-              </h1>
-              <p className="text-gray-600">
-                Suivez et gérez vos livraisons
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-5 w-5" />
+                  <MoreVertical size={20} />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -171,6 +156,20 @@ const LivreurDashboard = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
+        </div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="container py-12"
+      >
+        <div className="mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Gestion des Livraisons</h1>
+            <p className="text-gray-600">Suivez et gérez vos livraisons</p>
           </div>
         </div>
 
