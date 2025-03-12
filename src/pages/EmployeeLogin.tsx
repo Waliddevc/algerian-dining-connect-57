@@ -70,7 +70,7 @@ const EmployeeLogin = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center justify-center p-6 relative">
       {/* Home Icon */}
-      <Link to="/" className="absolute top-6 left-6 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all">
+      <Link to="/" className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all">
         <Home className="text-primary h-6 w-6" />
       </Link>
       
