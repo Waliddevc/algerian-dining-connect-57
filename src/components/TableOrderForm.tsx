@@ -15,6 +15,12 @@ import { toast } from "@/components/ui/use-toast";
 interface TableOrderFormProps {
   tableId: number;
   onClose: () => void;
+  onSubmit?: (order: {
+    tableId: number;
+    dishId: number;
+    quantity: number;
+    notes: string;
+  }) => void;
 }
 
 const menuItems = [
@@ -25,7 +31,7 @@ const menuItems = [
   { id: 5, name: "Mint Tea", price: 3.99 },
 ];
 
-export const TableOrderForm = ({ tableId, onClose }: TableOrderFormProps) => {
+export const TableOrderForm = ({ tableId, onClose, onSubmit }: TableOrderFormProps) => {
   const [selectedItem, setSelectedItem] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
@@ -42,6 +48,15 @@ export const TableOrderForm = ({ tableId, onClose }: TableOrderFormProps) => {
       return;
     }
 
+    if (onSubmit) {
+      onSubmit({
+        tableId,
+        dishId: parseInt(selectedItem),
+        quantity,
+        notes
+      });
+    }
+    
     toast({
       title: "Commande envoyée",
       description: `Commande pour la table ${tableId} envoyée en cuisine`,
