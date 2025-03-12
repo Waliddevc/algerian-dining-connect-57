@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { ChefHat } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type EmployeeRole = "serveur-chef" | "serveur-salle" | "cuisinier" | "caissier" | "livreur" | "gerant";
 
@@ -14,32 +16,23 @@ const EmployeeLogin = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    role: "" as EmployeeRole | "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
+    if (!formData.email || !formData.password || !formData.role) {
       toast({
         title: "Erreur de connexion",
-        description: "Veuillez saisir votre email et mot de passe.",
+        description: "Veuillez remplir tous les champs requis.",
         variant: "destructive",
       });
       return;
     }
 
-    // Mock role assignment based on email domain (to be replaced with actual auth)
-    const role: EmployeeRole = formData.email.includes("serveur-chef") 
-      ? "serveur-chef"
-      : formData.email.includes("serveur-salle")
-      ? "serveur-salle"
-      : formData.email.includes("cuisinier")
-      ? "cuisinier"
-      : formData.email.includes("caissier")
-      ? "caissier"
-      : formData.email.includes("livreur")
-      ? "livreur"
-      : "gerant";
+    // Use the directly selected role instead of parsing from email
+    const role = formData.role as EmployeeRole;
 
     toast({
       title: "Connexion réussie!",
@@ -64,6 +57,13 @@ const EmployeeLogin = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleRoleChange = (value: string) => {
+    setFormData({
+      ...formData,
+      role: value as EmployeeRole,
     });
   };
 
@@ -100,6 +100,26 @@ const EmployeeLogin = () => {
                 onChange={handleChange}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Type d'emploi</Label>
+              <Select 
+                value={formData.role}
+                onValueChange={handleRoleChange}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sélectionnez votre poste" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="serveur-chef">Serveur Chef</SelectItem>
+                  <SelectItem value="serveur-salle">Serveur Salle</SelectItem>
+                  <SelectItem value="cuisinier">Cuisinier</SelectItem>
+                  <SelectItem value="caissier">Caissier</SelectItem>
+                  <SelectItem value="livreur">Livreur</SelectItem>
+                  <SelectItem value="gerant">Gérant</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
