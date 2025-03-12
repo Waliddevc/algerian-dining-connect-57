@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { ChefHat } from "lucide-react";
 
+// Define type for valid employee roles
+type EmployeeRole = "serveur-chef" | "serveur-salle" | "cuisinier" | "caissier" | "livreur" | "gerant";
+
 const EmployeeLogin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -29,7 +32,7 @@ const EmployeeLogin = () => {
     }
 
     // Simulate employee role check (replace with actual authentication logic)
-    const simulatedRole = "serveur-chef"; // This would be determined by your backend
+    const simulatedRole: EmployeeRole = "serveur-chef"; // This would be determined by your backend
 
     // Show success message
     toast({

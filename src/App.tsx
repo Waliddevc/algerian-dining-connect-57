@@ -10,6 +10,11 @@ import ClientLogin from "./pages/ClientLogin";
 import EmployeeLogin from "./pages/EmployeeLogin";
 import ClientDashboard from "./pages/ClientDashboard";
 import ServeurChefDashboard from "./pages/ServeurChefDashboard";
+import ServeurSalleDashboard from "./pages/ServeurSalleDashboard";
+import CuisineDashboard from "./pages/CuisineDashboard";
+import CaissierDashboard from "./pages/CaissierDashboard";
+import LivreurDashboard from "./pages/LivreurDashboard";
+import GerantDashboard from "./pages/GerantDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +32,11 @@ const App = () => (
           <Route path="/employee-login" element={<EmployeeLogin />} />
           <Route path="/client-dashboard" element={<ClientDashboard />} />
           <Route path="/serveur-chef-dashboard" element={<ServeurChefDashboard />} />
+          <Route path="/serveur-salle-dashboard" element={<ServeurSalleDashboard />} />
+          <Route path="/cuisine-dashboard" element={<CuisineDashboard />} />
+          <Route path="/caissier-dashboard" element={<CaissierDashboard />} />
+          <Route path="/livreur-dashboard" element={<LivreurDashboard />} />
+          <Route path="/gerant-dashboard" element={<GerantDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
