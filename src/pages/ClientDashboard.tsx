@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Book, Utensils, Receipt, QrCode, 
   Star, ShoppingBag, LogOut, ShoppingCart,
-  Home, ArrowLeft, MoreVertical, UserCircle
+  Home, ArrowLeft, MoreVertical, UserCircle,
+  History
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 
 const ClientDashboard = () => {
@@ -79,18 +80,15 @@ const ClientDashboard = () => {
   };
 
   const addToCart = (item: DeliveryItem) => {
-    // Check if item already exists in cart
     const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
     
     if (existingItem) {
-      // Update quantity if item exists
       setCartItems(cartItems.map(cartItem => 
         cartItem.id === item.id 
           ? { ...cartItem, quantity: cartItem.quantity + 1 } 
           : cartItem
       ));
     } else {
-      // Add new item to cart
       setCartItems([...cartItems, item]);
     }
     
@@ -132,19 +130,15 @@ const ClientDashboard = () => {
       return;
     }
     
-    // Calculate total
     const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    // Simulating order submission
     toast({
       title: "Commande confirmée",
       description: `Votre commande de ${total.toFixed(2)}€ a été reçue`
     });
     
-    // Clear cart after successful order
     setCartItems([]);
     
-    // Redirect to active orders tab
     setActiveTab("active-orders");
   };
 
@@ -167,6 +161,11 @@ const ClientDashboard = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setActiveTab("history")}>
+                  <History className="mr-2 h-4 w-4" />
+                  <span>Historique</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
                   <UserCircle className="mr-2 h-4 w-4" />
                   <span>Profil</span>
