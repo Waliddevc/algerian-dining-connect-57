@@ -3,17 +3,90 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { 
   Receipt, DollarSign, Calendar, CreditCard, 
-  Home, Search, User, Printer
+  Home, Search, User, Printer, CheckCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import EmployeeSidebar from "@/components/EmployeeSidebar";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+interface PaymentDialogProps {
+  tableId: number;
+  total: number;
+  isOpen: boolean;
+  onClose: () => void;
+  onProcessPayment: (method: string) => void;
+}
+
+const PaymentDialog = ({ tableId, total, isOpen, onClose, onProcessPayment }: PaymentDialogProps) => {
+  const [selectedMethod, setSelectedMethod] = useState<string>("");
+  
+  const handlePayment = () => {
+    if (!selectedMethod) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner une méthode de paiement",
+        variant: "destructive",
+      });
+      return;
+    }
+    onProcessPayment(selectedMethod);
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Traitement du paiement - Table {tableId}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="text-lg font-semibold">
+            Total à payer: {total.toFixed(2)} DA
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant={selectedMethod === "Carte" ? "default" : "outline"}
+              onClick={() => setSelectedMethod("Carte")}
+            >
+              <CreditCard className="mr-2" />
+              Carte Bancaire
+            </Button>
+            <Button
+              variant={selectedMethod === "Espèces" ? "default" : "outline"}
+              onClick={() => setSelectedMethod("Espèces")}
+            >
+              <DollarSign className="mr-2" />
+              Espèces
+            </Button>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button onClick={handlePayment}>
+              <CheckCircle className="mr-2" />
+              Valider
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const CaissierDashboard = () => {
   const [activeTab, setActiveTab] = useState("paiements");
   const [tableSearch, setTableSearch] = useState("");
+  const [selectedTable, setSelectedTable] = useState<{ id: number; total: number } | null>(null);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
 
   // Mock data for tables with bills
   const tables = [
@@ -23,18 +96,37 @@ const CaissierDashboard = () => {
   ];
 
   // Mock data for recent transactions
-  const transactions = [
+  const [transactions, setTransactions] = useState([
     { id: 1001, table: 2, amount: 145.50, method: "Carte", time: "19:40", status: "completed" },
     { id: 1002, table: 4, amount: 187.25, method: "Espèces", time: "19:25", status: "completed" },
     { id: 1003, table: 8, amount: 93.00, method: "Carte", time: "18:55", status: "completed" },
-    { id: 1004, table: 7, amount: 210.75, method: "Mobile", time: "18:35", status: "completed" },
-  ];
+  ]);
 
-  const handlePayment = (tableId: number) => {
+  const handlePayment = (tableId: number, total: number) => {
+    setSelectedTable({ id: tableId, total });
+    setIsPaymentDialogOpen(true);
+  };
+
+  const handleProcessPayment = (method: string) => {
+    if (!selectedTable) return;
+
+    const newTransaction = {
+      id: Date.now(),
+      table: selectedTable.id,
+      amount: selectedTable.total,
+      method,
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      status: "completed"
+    };
+
+    setTransactions(prev => [newTransaction, ...prev]);
+    
     toast({
-      title: `Table ${tableId}`,
-      description: "Paiement traité avec succès",
+      title: "Paiement effectué",
+      description: `Table ${selectedTable.id} - ${selectedTable.total.toFixed(2)} DA par ${method}`,
     });
+    
+    setSelectedTable(null);
   };
 
   const handlePrintReceipt = (transactionId: number) => {

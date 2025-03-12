@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { 
@@ -28,7 +27,6 @@ import {
 import EmployeeSidebar from "@/components/EmployeeSidebar";
 import { TableOrderForm } from "@/components/TableOrderForm";
 
-// Types pour notre application
 interface TableData {
   id: number;
   status: "available" | "occupied" | "reserved";
@@ -60,7 +58,7 @@ interface OrderData {
   status: "En attente" | "En préparation" | "Prêt" | "Servi" | "Terminé";
 }
 
-const ServeurChefDashboard = () => {
+export const ServeurChefDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("tables");
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
@@ -70,19 +68,12 @@ const ServeurChefDashboard = () => {
   const [assignTableDialog, setAssignTableDialog] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<ReservationData | null>(null);
 
-  // Mock data pour les tables
   const [tables, setTables] = useState<TableData[]>([
-    { id: 1, status: "occupied", customers: 4, time: "19:30", orders: "En cours" },
+    { id: 1, status: "occupied", customers: 4, time: "19:30", orders: "2 Couscous, 1 Tajine" },
     { id: 2, status: "available", customers: 0, time: "", orders: "" },
-    { id: 3, status: "reserved", customers: 2, time: "20:00", orders: "En attente" },
-    { id: 4, status: "available", customers: 0, time: "", orders: "" },
-    { id: 5, status: "occupied", customers: 6, time: "19:15", orders: "Servi" },
-    { id: 6, status: "occupied", customers: 2, time: "20:15", orders: "En cours" },
-    { id: 7, status: "available", customers: 0, time: "", orders: "" },
-    { id: 8, status: "reserved", customers: 3, time: "21:00", orders: "En attente" },
+    { id: 3, status: "reserved", customers: 6, time: "20:00", orders: "En attente" }
   ]);
 
-  // Mock data pour les réservations
   const [reservations, setReservations] = useState<ReservationData[]>([
     { id: 101, name: "Karim Benzema", time: "20:00", people: 2, table: 3, status: "Confirmé" },
     { id: 102, name: "Zinedine Zidane", time: "21:00", people: 3, table: 8, status: "Confirmé" },
@@ -90,7 +81,6 @@ const ServeurChefDashboard = () => {
     { id: 104, name: "Ismael Bennacer", time: "20:30", people: 2, table: null, status: "En attente" },
   ]);
 
-  // Mock data pour les commandes
   const [orders, setOrders] = useState<OrderData[]>([
     { 
       id: 1, 
@@ -127,20 +117,16 @@ const ServeurChefDashboard = () => {
   const handleTableClick = (tableId: number) => {
     setSelectedTable(tableId);
     
-    // Vérifier si la table est occupée ou réservée
     const table = tables.find(t => t.id === tableId);
     if (table?.status === "occupied") {
-      // Afficher les détails de la commande
       const tableOrder = orders.find(o => o.tableId === tableId);
       if (tableOrder) {
         setSelectedOrder(tableOrder);
         setShowOrderDetails(true);
       } else {
-        // Option pour ajouter une commande
         setShowOrderForm(true);
       }
     } else if (table?.status === "available") {
-      // Option pour placer des clients
       toast({
         title: `Table ${tableId}`,
         description: "Table disponible. Cliquez sur 'Réservations' pour assigner des clients.",
@@ -166,10 +152,8 @@ const ServeurChefDashboard = () => {
         });
       }
     } else if (action === "annulée") {
-      // Mettre à jour les réservations et libérer la table si assignée
       const updatedReservations = reservations.map(r => {
         if (r.id === resId) {
-          // Si la réservation avait une table assignée, on la libère
           if (r.table) {
             const updatedTables = tables.map(t => {
               if (t.id === r.table) {
@@ -179,8 +163,6 @@ const ServeurChefDashboard = () => {
             });
             setTables(updatedTables);
           }
-          
-          // Retourner la réservation sans la supprimer pour cet exemple
           return { ...r, status: "En attente" as const, table: null };
         }
         return r;
@@ -198,7 +180,6 @@ const ServeurChefDashboard = () => {
   const assignTableToReservation = (tableId: number) => {
     if (!selectedReservation) return;
     
-    // Mettre à jour la table
     const updatedTables = tables.map(t => {
       if (t.id === tableId) {
         return {
@@ -212,7 +193,6 @@ const ServeurChefDashboard = () => {
       return t;
     });
     
-    // Mettre à jour la réservation
     const updatedReservations = reservations.map(r => {
       if (r.id === selectedReservation.id) {
         return { ...r, table: tableId, status: "Confirmé" as const };
@@ -231,7 +211,6 @@ const ServeurChefDashboard = () => {
   };
   
   const handleAddOrder = (orderData: { tableId: number; dishId: number; quantity: number; notes: string }) => {
-    // Trouver le nom du plat
     const menuItems = [
       { id: 1, name: "Couscous Royal", price: 18.99 },
       { id: 2, name: "Tajine Poulet", price: 16.99 },
@@ -242,11 +221,9 @@ const ServeurChefDashboard = () => {
     
     const dishName = menuItems.find(item => item.id === orderData.dishId)?.name || "Plat inconnu";
     
-    // Vérifier si une commande existe déjà pour cette table
     const existingOrderIndex = orders.findIndex(o => o.tableId === orderData.tableId);
     
     if (existingOrderIndex !== -1) {
-      // Ajouter un élément à une commande existante
       const updatedOrders = [...orders];
       updatedOrders[existingOrderIndex].items.push({
         id: orderData.dishId,
@@ -258,7 +235,6 @@ const ServeurChefDashboard = () => {
       
       setOrders(updatedOrders);
     } else {
-      // Créer une nouvelle commande
       const newOrder: OrderData = {
         id: orders.length + 1,
         tableId: orderData.tableId,
@@ -275,14 +251,13 @@ const ServeurChefDashboard = () => {
       
       setOrders([...orders, newOrder]);
       
-      // Mettre à jour le statut de la table si nécessaire
       if (tables.find(t => t.id === orderData.tableId)?.status !== "occupied") {
         const updatedTables = tables.map(t => {
           if (t.id === orderData.tableId) {
             return {
               ...t,
               status: "occupied",
-              customers: t.customers || 2, // Valeur par défaut si pas définie
+              customers: t.customers || 2,
               time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               orders: "En cours"
             };
@@ -305,7 +280,6 @@ const ServeurChefDashboard = () => {
     
     setOrders(updatedOrders);
     
-    // Mettre à jour le statut de la table
     if (status === "Servi" || status === "Terminé") {
       const order = orders.find(o => o.id === orderId);
       if (order) {
@@ -336,7 +310,14 @@ const ServeurChefDashboard = () => {
     setTimeout(() => navigate("/"), 1500);
   };
 
-  // Items de menu pour la sidebar
+  const handleUpdateStatus = (tableId: number, status: "available" | "occupied" | "reserved") => {
+    setTables(prevTables =>
+      prevTables.map(table =>
+        table.id === tableId ? { ...table, status } : table
+      )
+    );
+  };
+
   const menuItems = [
     {
       icon: <LayoutDashboard size={18} />,
@@ -371,24 +352,13 @@ const ServeurChefDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
         <EmployeeSidebar 
           title="Restaurant Algérien"
           role="Serveur Chef"
           menuItems={menuItems}
         />
         
-        {/* Main content */}
         <div className="flex-1 overflow-auto">
-          {/* Top Bar - Mobile only */}
-          <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
-            <h2 className="font-bold text-primary">Restaurant Algérien</h2>
-            <Button variant="ghost" size="icon">
-              <Home size={20} />
-            </Button>
-          </div>
-          
-          {/* Content */}
           <div className="p-6">
             <motion.div
               initial={{ opacity: 0 }}
@@ -571,7 +541,6 @@ const ServeurChefDashboard = () => {
         </div>
       </div>
       
-      {/* Dialogue pour le formulaire de commande */}
       <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
         <DialogContent>
           <DialogHeader>
@@ -590,7 +559,6 @@ const ServeurChefDashboard = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Dialogue pour les détails de commande */}
       <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -684,7 +652,6 @@ const ServeurChefDashboard = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Dialogue pour assigner une table à une réservation */}
       <Dialog open={assignTableDialog} onOpenChange={setAssignTableDialog}>
         <DialogContent>
           <DialogHeader>
