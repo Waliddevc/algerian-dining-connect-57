@@ -181,7 +181,7 @@ const ServeurChefDashboard = () => {
           }
           
           // Retourner la réservation sans la supprimer pour cet exemple
-          return { ...r, status: "En attente", table: null };
+          return { ...r, status: "En attente" as const, table: null };
         }
         return r;
       });
@@ -203,7 +203,7 @@ const ServeurChefDashboard = () => {
       if (t.id === tableId) {
         return {
           ...t,
-          status: "reserved",
+          status: "reserved" as const,
           customers: selectedReservation.people,
           time: selectedReservation.time,
           orders: "En attente"
@@ -215,7 +215,7 @@ const ServeurChefDashboard = () => {
     // Mettre à jour la réservation
     const updatedReservations = reservations.map(r => {
       if (r.id === selectedReservation.id) {
-        return { ...r, table: tableId, status: "Confirmé" };
+        return { ...r, table: tableId, status: "Confirmé" as const };
       }
       return r;
     });
