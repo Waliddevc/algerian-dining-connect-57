@@ -10,8 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Info } from "lucide-react";
 import { fr } from "date-fns/locale";
+import RestaurantFloorPlan from "./RestaurantFloorPlan";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const TableReservationComponent = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -19,6 +26,7 @@ const TableReservationComponent = () => {
   const [guests, setGuests] = useState<string>("2");
   const [zone, setZone] = useState<string>("intérieur");
   const [specialRequests, setSpecialRequests] = useState<string>("");
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   
   const availableTimes = [
     "12:00", "12:30", "13:00", "13:30", "19:00", "19:30", "20:00", "20:30", "21:00"
@@ -35,10 +43,19 @@ const TableReservationComponent = () => {
       });
       return;
     }
+
+    if (!selectedTableId) {
+      toast({
+        title: "Table non sélectionnée",
+        description: "Veuillez sélectionner une table sur le plan",
+        variant: "destructive",
+      });
+      return;
+    }
     
     toast({
       title: "Réservation confirmée",
-      description: `Votre table pour ${guests} personne(s) a été réservée le ${format(date, "dd MMMM yyyy", { locale: fr })} à ${time}.`,
+      description: `Votre table #${selectedTableId} pour ${guests} personne(s) a été réservée le ${format(date, "dd MMMM yyyy", { locale: fr })} à ${time}.`,
     });
   };
   
@@ -118,6 +135,56 @@ const TableReservationComponent = () => {
               </div>
             </RadioGroup>
           </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="text-lg font-medium">Plan du restaurant</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Info className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Cliquez sur une table disponible pour la sélectionner</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="w-3 h-3 rounded-full bg-green-100 border border-green-300"></div>
+                    <span className="text-xs">Disponible</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-100 border border-red-300"></div>
+                    <span className="text-xs">Occupée</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-100 border border-yellow-300"></div>
+                    <span className="text-xs">Réservée</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-100 border border-blue-300"></div>
+                    <span className="text-xs">Sélectionnée</span>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
+          <div className="border rounded-md p-4 bg-slate-50">
+            <RestaurantFloorPlan 
+              selectedTableId={selectedTableId} 
+              onTableSelect={setSelectedTableId}
+              zone={zone}
+              date={date}
+              time={time}
+            />
+          </div>
+          
+          {selectedTableId && (
+            <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
+              <p className="text-blue-700 font-medium">Table #{selectedTableId} sélectionnée</p>
+            </div>
+          )}
         </div>
         
         <div className="space-y-2">
