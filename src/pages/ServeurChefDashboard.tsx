@@ -29,7 +29,7 @@ import { TableOrderForm } from "@/components/TableOrderForm";
 
 interface TableData {
   id: number;
-  status: "available" | "occupied" | "reserved";
+  status: "available" | "occupied" | "reserved" | string;
   customers: number;
   time: string;
   orders: string;
@@ -69,9 +69,12 @@ export const ServeurChefDashboard = () => {
   const [selectedReservation, setSelectedReservation] = useState<ReservationData | null>(null);
 
   const [tables, setTables] = useState<TableData[]>([
-    { id: 1, status: "occupied", customers: 4, time: "19:30", orders: "2 Couscous, 1 Tajine" },
-    { id: 2, status: "available", customers: 0, time: "", orders: "" },
-    { id: 3, status: "reserved", customers: 6, time: "20:00", orders: "En attente" }
+    { id: 1, status: "available", customers: 0, time: "--:--", orders: "" },
+    { id: 2, status: "occupied", customers: 4, time: "19:15", orders: "Couscous (2), Chorba (4)" },
+    { id: 3, status: "reserved", customers: 2, time: "20:00", orders: "" },
+    { id: 4, status: "available", customers: 0, time: "--:--", orders: "" },
+    { id: 5, status: "available", customers: 0, time: "--:--", orders: "" },
+    { id: 6, status: "occupied", customers: 6, time: "18:45", orders: "Tajine (3), Makroud (6)" }
   ]);
 
   const [reservations, setReservations] = useState<ReservationData[]>([
@@ -302,20 +305,20 @@ export const ServeurChefDashboard = () => {
     setShowOrderDetails(false);
   };
 
+  const updateTableStatus = (tableId: number, status: "available" | "occupied" | "reserved") => {
+    setTables(tables.map(table => 
+      table.id === tableId 
+        ? { ...table, status, customers: status === "available" ? 0 : table.customers, time: status === "available" ? "--:--" : table.time, orders: status === "available" ? "" : table.orders } 
+        : table
+    ));
+  };
+
   const handleLogout = () => {
     toast({
       title: "Déconnexion réussie",
       description: "À bientôt!"
     });
     setTimeout(() => navigate("/"), 1500);
-  };
-
-  const handleUpdateStatus = (tableId: number, status: "available" | "occupied" | "reserved") => {
-    setTables(prevTables =>
-      prevTables.map(table =>
-        table.id === tableId ? { ...table, status } : table
-      )
-    );
   };
 
   const menuItems = [

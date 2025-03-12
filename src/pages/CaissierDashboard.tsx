@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { 
@@ -122,8 +121,8 @@ const CaissierDashboard = () => {
     setTransactions(prev => [newTransaction, ...prev]);
     
     toast({
-      title: "Paiement effectué",
-      description: `Table ${selectedTable.id} - ${selectedTable.total.toFixed(2)} DA par ${method}`,
+      title: "Paiement traité",
+      description: `Paiement de ${selectedTable.total.toFixed(2)} DA par ${method} traité avec succès`
     });
     
     setSelectedTable(null);
