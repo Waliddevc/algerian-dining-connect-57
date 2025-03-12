@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
@@ -18,6 +19,7 @@ import TableReservationComponent from "@/components/client/TableReservationCompo
 import RatingComponent from "@/components/client/RatingComponent";
 import { Card } from "@/components/ui/card";
 import ProfileDialog from "@/components/ProfileDialog";
+import QrCodesDialog from "@/components/client/QrCodesDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +33,7 @@ const ClientDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [cartItems, setCartItems] = useState<DeliveryItem[]>([]);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showQrCodesDialog, setShowQrCodesDialog] = useState(false);
   
   const menuOptions = [
     { 
@@ -164,6 +167,10 @@ const ClientDashboard = () => {
                 <DropdownMenuItem onClick={() => setActiveTab("history")}>
                   <History className="mr-2 h-4 w-4" />
                   <span>Historique</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowQrCodesDialog(true)}>
+                  <QrCode className="mr-2 h-4 w-4" />
+                  <span>Mes QR Codes</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowProfileDialog(true)}>
@@ -356,6 +363,11 @@ const ClientDashboard = () => {
           email: "client@restaurant.dz",
           phone: "0555123456",
         }}
+      />
+
+      <QrCodesDialog
+        open={showQrCodesDialog}
+        onOpenChange={setShowQrCodesDialog}
       />
     </div>
   );
