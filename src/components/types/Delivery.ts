@@ -10,3 +10,12 @@ export interface Delivery {
   rating?: number;
   items: string[];
 }
+
+export interface DeliveryItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  description?: string;
+}

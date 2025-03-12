@@ -1,10 +1,10 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Users, Bell, ClipboardList, 
-  Home, MessageSquare, User, Utensils
+  Home, MessageSquare, User, Utensils,
+  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TableOrderForm } from "@/components/TableOrderForm";
@@ -74,6 +74,14 @@ const ServeurSalleDashboard = () => {
     navigate("/");
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+    toast({
+      title: "Navigation",
+      description: "Retour à la page précédente",
+    });
+  };
+
   const sidebarMenuItems = [
     { icon: <Users size={18} />, label: "Gestion des tables" },
     { icon: <Utensils size={18} />, label: "Commandes en cours" },
@@ -94,9 +102,14 @@ const ServeurSalleDashboard = () => {
         <div className="flex-1 overflow-auto">
           <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
             <h2 className="font-bold text-primary">Restaurant Algérien</h2>
-            <Button variant="ghost" size="icon" onClick={handleHomeClick}>
-              <Home size={20} />
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="icon" onClick={handleGoBack}>
+                <ArrowLeft size={20} />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleHomeClick}>
+                <Home size={20} />
+              </Button>
+            </div>
           </div>
           
           <div className="p-6">
@@ -110,16 +123,24 @@ const ServeurSalleDashboard = () => {
                   <h1 className="text-2xl font-bold text-primary">Serveur en Salle</h1>
                   <p className="text-gray-600">Gérez vos tables et les commandes</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="hidden md:flex"
-                  onClick={handleHomeClick}
-                >
-                  <Home size={20} />
-                </Button>
+                <div className="hidden md:flex gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={handleGoBack}
+                  >
+                    <ArrowLeft size={20} />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={handleHomeClick}
+                  >
+                    <Home size={20} />
+                  </Button>
+                </div>
               </div>
-              
+
               <Tabs defaultValue="tables" className="mb-6" onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="tables">Tables</TabsTrigger>
