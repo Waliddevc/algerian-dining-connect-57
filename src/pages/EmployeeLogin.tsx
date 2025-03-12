@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { ChefHat } from "lucide-react";
 
-// Define type for valid employee roles
 type EmployeeRole = "serveur-chef" | "serveur-salle" | "cuisinier" | "caissier" | "livreur" | "gerant";
 
 const EmployeeLogin = () => {
@@ -21,7 +19,6 @@ const EmployeeLogin = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
     if (!formData.email || !formData.password) {
       toast({
         title: "Erreur de connexion",
@@ -31,10 +28,19 @@ const EmployeeLogin = () => {
       return;
     }
 
-    // Simulate employee role check (replace with actual authentication logic)
-    const simulatedRole: EmployeeRole = "serveur-chef"; // This would be determined by your backend
+    // Mock role assignment based on email domain (to be replaced with actual auth)
+    const role: EmployeeRole = formData.email.includes("serveur-chef") 
+      ? "serveur-chef"
+      : formData.email.includes("serveur-salle")
+      ? "serveur-salle"
+      : formData.email.includes("cuisinier")
+      ? "cuisinier"
+      : formData.email.includes("caissier")
+      ? "caissier"
+      : formData.email.includes("livreur")
+      ? "livreur"
+      : "gerant";
 
-    // Show success message
     toast({
       title: "Connexion réussie!",
       description: "Bienvenue dans votre espace employé.",
@@ -42,28 +48,15 @@ const EmployeeLogin = () => {
 
     // Redirect based on employee role
     setTimeout(() => {
-      switch (simulatedRole) {
-        case "serveur-chef":
-          navigate("/serveur-chef-dashboard");
-          break;
-        case "serveur-salle":
-          navigate("/serveur-salle-dashboard");
-          break;
-        case "cuisinier":
-          navigate("/cuisine-dashboard");
-          break;
-        case "caissier":
-          navigate("/caissier-dashboard");
-          break;
-        case "livreur":
-          navigate("/livreur-dashboard");
-          break;
-        case "gerant":
-          navigate("/gerant-dashboard");
-          break;
-        default:
-          navigate("/employee-dashboard");
-      }
+      const roleRoutes: Record<EmployeeRole, string> = {
+        "serveur-chef": "/serveur-chef-dashboard",
+        "serveur-salle": "/serveur-salle-dashboard",
+        "cuisinier": "/cuisine-dashboard",
+        "caissier": "/caissier-dashboard",
+        "livreur": "/livreur-dashboard",
+        "gerant": "/gerant-dashboard"
+      };
+      navigate(roleRoutes[role]);
     }, 1500);
   };
 
