@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Package, CheckCircle, Clock, Star, User, Settings, LogOut } from "lucide-react";
+import { MapPin, Package, CheckCircle, Clock, Star, User, Settings, LogOut, Home, ArrowLeft, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +12,14 @@ import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { Delivery } from "@/components/types/Delivery";
+import ProfileDialog from "@/components/ProfileDialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const LivreurDashboard = () => {
   const navigate = useNavigate();
   const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
   const [deliveryDetailsOpen, setDeliveryDetailsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [activeDeliveries, setActiveDeliveries] = useState<Delivery[]>([
     {
       id: 1,
@@ -116,6 +120,14 @@ const LivreurDashboard = () => {
     setTimeout(() => navigate("/"), 1500);
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleGoHome = () => {
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <motion.div
@@ -125,18 +137,41 @@ const LivreurDashboard = () => {
         className="container py-12"
       >
         <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-primary">
-              Tableau de bord Livreur
-            </h1>
-            <p className="text-gray-600">
-              Suivez et gérez vos livraisons
-            </p>
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" onClick={handleGoBack}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleGoHome}>
+              <Home className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-primary">
+                Tableau de bord Livreur
+              </h1>
+              <p className="text-gray-600">
+                Suivez et gérez vos livraisons
+              </p>
+            </div>
           </div>
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut size={16} className="mr-2" />
-            Déconnexion
-          </Button>
+          <div className="flex items-center space-x-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setProfileOpen(true)}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profil</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Déconnexion</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <Tabs defaultValue="active" className="space-y-4">
@@ -328,6 +363,22 @@ const LivreurDashboard = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <ProfileDialog
+          open={profileOpen}
+          onOpenChange={setProfileOpen}
+          initialData={{
+            name: "Mourad Livreur",
+            email: "mourad@restodz.com",
+            phone: "0661234567"
+          }}
+          titles={{
+            dialog: "Profil du Livreur",
+            description: "Mettez à jour vos informations personnelles ici.",
+            submitButton: "Enregistrer les modifications",
+            successMessage: "Vos informations ont été mises à jour avec succès"
+          }}
+        />
       </motion.div>
     </div>
   );
