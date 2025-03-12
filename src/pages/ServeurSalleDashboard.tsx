@@ -3,51 +3,71 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { 
   Users, Bell, ClipboardList, 
-  Home, MessageSquare, User
+  Home, MessageSquare, User, Utensils
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TableOrderForm } from "@/components/TableOrderForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import EmployeeSidebar from "@/components/EmployeeSidebar";
 
+interface Table {
+  id: number;
+  status: "available" | "occupied" | "reserved";
+  customers: number;
+  time: string;
+  orders: string;
+  notifications: number;
+}
+
 const ServeurSalleDashboard = () => {
   const [activeTab, setActiveTab] = useState("tables");
+  const [selectedTable, setSelectedTable] = useState<number | null>(null);
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
 
-  // Mock data for tables
-  const tables = [
+  const [tables, setTables] = useState<Table[]>([
     { id: 1, status: "occupied", customers: 4, time: "19:30", orders: "En cours", notifications: 1 },
     { id: 2, status: "available", customers: 0, time: "", orders: "", notifications: 0 },
     { id: 3, status: "reserved", customers: 2, time: "20:00", orders: "En attente", notifications: 0 },
     { id: 4, status: "available", customers: 0, time: "", orders: "", notifications: 0 },
     { id: 5, status: "occupied", customers: 6, time: "19:15", orders: "Servi", notifications: 2 },
     { id: 6, status: "occupied", customers: 2, time: "20:15", orders: "En cours", notifications: 0 },
-  ];
-
-  // Mock data for kitchen notifications
-  const kitchenNotifications = [
-    { id: 201, table: 1, dish: "Couscous Agneau", status: "Prêt", time: "19:45" },
-    { id: 202, table: 5, dish: "Tajine Poulet", status: "Prêt", time: "19:50" },
-    { id: 203, table: 5, dish: "Baklava", status: "En préparation", time: "19:55" },
-  ];
+  ]);
 
   const handleTableClick = (tableId: number) => {
-    toast({
-      title: `Table ${tableId}`,
-      description: "Fonctionnalité détaillée en développement",
-    });
+    setSelectedTable(tableId);
+    if (tables.find(t => t.id === tableId)?.status !== "available") {
+      setOrderDialogOpen(true);
+    } else {
+      toast({
+        title: "Table disponible",
+        description: "Vous pouvez placer des clients à cette table",
+      });
+    }
   };
 
-  const handleNotificationAction = (notifId: number, action: string) => {
+  const handleTableStatusChange = (tableId: number, newStatus: Table["status"]) => {
+    setTables(tables.map(table => 
+      table.id === tableId 
+        ? { ...table, status: newStatus, time: new Date().toLocaleTimeString() }
+        : table
+    ));
     toast({
-      title: `Notification ${notifId} ${action}`,
-      description: "Fonctionnalité en développement",
+      title: "Statut mis à jour",
+      description: `Table ${tableId} marquée comme ${newStatus}`,
     });
   };
 
   const sidebarMenuItems = [
     { icon: <Users size={18} />, label: "Gestion des tables" },
+    { icon: <Utensils size={18} />, label: "Commandes en cours" },
     { icon: <Bell size={18} />, label: "Notifications cuisine" },
-    { icon: <ClipboardList size={18} />, label: "Commandes clients" },
     { icon: <MessageSquare size={18} />, label: "Demandes spéciales" },
     { icon: <User size={18} />, label: "Profil" },
   ];
@@ -55,16 +75,13 @@ const ServeurSalleDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
         <EmployeeSidebar 
           title="Restaurant Algérien" 
           role="Serveur en Salle"
           menuItems={sidebarMenuItems}
         />
         
-        {/* Main content */}
         <div className="flex-1 overflow-auto">
-          {/* Top Bar - Mobile only */}
           <div className="md:hidden bg-white shadow-sm p-4 flex justify-between items-center">
             <h2 className="font-bold text-primary">Restaurant Algérien</h2>
             <Button variant="ghost" size="icon">
@@ -72,7 +89,6 @@ const ServeurSalleDashboard = () => {
             </Button>
           </div>
           
-          {/* Content */}
           <div className="p-6">
             <motion.div
               initial={{ opacity: 0 }}
@@ -82,14 +98,14 @@ const ServeurSalleDashboard = () => {
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h1 className="text-2xl font-bold text-primary">Serveur en Salle</h1>
-                  <p className="text-gray-600">Gérez vos tables et les demandes des clients</p>
+                  <p className="text-gray-600">Gérez vos tables et les commandes</p>
                 </div>
               </div>
               
               <Tabs defaultValue="tables" className="mb-6" onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="tables">Tables</TabsTrigger>
-                  <TabsTrigger value="notifications">Notifications Cuisine</TabsTrigger>
+                  <TabsTrigger value="notifications">Commandes en cours</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="tables" className="mt-6">
@@ -102,10 +118,10 @@ const ServeurSalleDashboard = () => {
                         transition={{ duration: 0.3, delay: table.id * 0.05 }}
                         className={`p-4 rounded-lg cursor-pointer shadow-sm relative ${
                           table.status === 'available' 
-                            ? 'bg-green-50 border border-green-200' 
+                            ? 'bg-green-50 border border-green-200 hover:bg-green-100' 
                             : table.status === 'occupied' 
-                              ? 'bg-red-50 border border-red-200' 
-                              : 'bg-yellow-50 border border-yellow-200'
+                              ? 'bg-red-50 border border-red-200 hover:bg-red-100' 
+                              : 'bg-yellow-50 border border-yellow-200 hover:bg-yellow-100'
                         }`}
                         onClick={() => handleTableClick(table.id)}
                       >
@@ -134,7 +150,22 @@ const ServeurSalleDashboard = () => {
                             <div className="mt-2 text-sm">
                               <p>{table.customers} personnes</p>
                               <p>{table.time}</p>
+                              <p className="text-gray-600">{table.orders}</p>
                             </div>
+                          )}
+
+                          {table.status === 'available' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="mt-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTableStatusChange(table.id, "occupied");
+                              }}
+                            >
+                              Placer des clients
+                            </Button>
                           )}
                         </div>
                       </motion.div>
@@ -148,41 +179,40 @@ const ServeurSalleDashboard = () => {
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Table</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plat</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commande</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heure</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {kitchenNotifications.map((notif) => (
-                          <tr key={notif.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">Table {notif.table}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">{notif.dish}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                notif.status === 'Prêt' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {notif.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">{notif.time}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              {notif.status === 'Prêt' && (
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="text-primary hover:text-primary-dark"
-                                  onClick={() => handleNotificationAction(notif.id, "servie")}
+                        {tables
+                          .filter(table => table.status === "occupied" && table.orders)
+                          .map((table) => (
+                            <tr key={table.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">Table {table.id}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">{table.orders}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  table.orders === "Servi"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                }`}>
+                                  {table.orders}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">{table.time}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleTableClick(table.id)}
                                 >
-                                  Marquer comme servi
+                                  Voir détails
                                 </Button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </div>
@@ -192,6 +222,18 @@ const ServeurSalleDashboard = () => {
           </div>
         </div>
       </div>
+
+      <Dialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Commander pour la Table {selectedTable}</DialogTitle>
+          </DialogHeader>
+          <TableOrderForm 
+            tableId={selectedTable || 0} 
+            onClose={() => setOrderDialogOpen(false)} 
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
